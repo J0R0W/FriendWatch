@@ -1,14 +1,8 @@
 import os
 import random
-import sched
 import string
-import atexit
-import time
-from threading import Timer as threadT
-
 from werkzeug.utils import secure_filename
 from flask import Flask, render_template, request, json, session, abort, redirect, url_for
-
 from utility import RepeatedTimer
 
 app = Flask(__name__)
@@ -19,6 +13,7 @@ adminTime = 4
 Rooms = {}
 
 
+# Class to manage Rooms
 class Raum:
     def __init__(self, raumCode, status, video):
         self.raumCode = raumCode
@@ -50,7 +45,7 @@ def watch(code):
         return render_template("watch.html", code=code, video=Rooms[code].video, type=Rooms[code].type)
     except:
         return "Falscher Code"
-        #abort(403)
+        # abort(403)
 
 
 @app.route('/create', methods=['POST'])
@@ -61,34 +56,33 @@ def createwatch():
         code = ''.join(random.choices(string.ascii_uppercase + string.digits, k=6))
         v = Raum(code, "pause", vid)
         Rooms[code] = v
-        #Store a link to a Video in a Txt File
-        if(vid.endswith('txt')):
+        # Store a link to a Video in a Txt File
+        if vid.endswith('txt'):
+            # get Path to Video Folder
             path = os.getcwd()
             path = os.path.join(path, "static")
             path = os.path.join(path, "video")
             path = os.path.join(path, vid)
             f = open(path, "r")
+            # Read the Link to a video
             videolocation = f.read()
             Rooms[code].video = videolocation
             Rooms[code].type = "txt"
         return redirect("/watch-" + code, code=302)
-        #return render_template("watch.html", code=code, video=vid)
     return
 
 
-@app.route('/layout')
-def lay():
-    return 'Hello World!'
-
 @app.route('/watch', methods=['POST'])
-def fnwatch():
+def joinwatch():
     if (request.method == "POST"):
         code = request.form.get("codeIn")
         return redirect("/watch-" + code, code=302)
 
-# Update Status if Play or Pause pressed
+
+# Update Status if Play or Pause pressed or if the Video Seeked
 @app.route('/videoStatus', methods=['POST'])
 def videostatus():
+    # Get Params from POST request
     videoEvent = request.form['event']
     videotime = request.form['time']
     videoid = request.form['id']
@@ -103,51 +97,56 @@ def videostatus():
         else:
             r.status = videoEvent
     if videoEvent == 'seeked':
+        # update the Time for the Video
         r.time = float(videotime)
-    elif (videoEvent == "pause"):
+    elif videoEvent == "pause":
         r.status = videoEvent
     return json.dumps({'status': 'OK', 'user': "Test"});
 
 
+# Method for request to read Video state and update client
 @app.route('/updateVideo', methods=['POST'])
 def updatetime():
     videotime = request.form['time']
     videoid = request.form['id']
     try:
         r = Rooms[videoid]
-        print(r.status)
 
         # if abs(r.lastPlay + float(videotime) - time.time()) > 1:
         if abs(r.time - float(videotime)) > 1:
             return json.dumps({'time': r.time, "updated": True, 'status': r.status})
         return json.dumps({"noupdate": False, 'status': r.status})
     except:
+        # The Room Code was not found
         return "Bad Room-Code"
-
 
 
 @app.route("/startwatch")
 def startwatch():
     if session.get('user') == "admin":
-
+        # Get Path to Video Folder
         path = os.getcwd()
         path = os.path.join(path, "static")
         path = os.path.join(path, "video")
-        # path = videoPath
         list_of_files = {}
-
+        #Put every File in Video Folder in the list
         for filename in os.listdir(path):
             list_of_files[filename] = "/static/video" + filename
+        #return the Template with the List, of all files in the Video folder
         return render_template("startwatch.html", videos=list_of_files)
     else:
         abort(403)
 
+
+# This Method is called every 0.25 Seconds to Update the Time for each active Room.
+# The server calculates the current time depending on client events.
 def calculateTime():
     for key, value in Rooms.items():
         if value.status == "play":
             value.time += 0.25
-            #print("update Raum " + key + " " + str(value.time))
 
+
+# Simple Login Method. Only One Username Exist.
 @app.route("/login", methods=["POST", "GET"])
 def login():
     if request.method == "POST":
@@ -158,7 +157,9 @@ def login():
         return redirect("/startwatch")
     else:
         return render_template("login.html")
-#timer = threadT(0.1, calculateTime).start()
+
+
+# The Timer which calls the calculateTimeMethod
 ti = RepeatedTimer(0.25, calculateTime)
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=1337)

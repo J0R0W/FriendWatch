@@ -1,3 +1,5 @@
+# A class for a timer
+# Got this Snippet from Stockoverflow: https://stackoverflow.com/a/13151299
 from threading import Timer
 
 class RepeatedTimer(object):

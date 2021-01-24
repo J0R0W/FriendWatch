@@ -1,0 +1,8 @@
+{
+  "name": "flaskProject",
+  "version": "1.0.0",
+  "dependencies": {},
+  "devDependencies": {
+    "rangetouch": "^2.0.1"
+  }
+}

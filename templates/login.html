@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+{% block title %}Index{% endblock %}
+{% block head %}
+    {{ super() }}
+    <!--<link rel="stylesheet" href="https://cdn.plyr.io/3.6.3/plyr.css"/-->
+    <link rel="stylesheet" href="/static/video.css"/>
+    <script src="https://kit.fontawesome.com/20713e1f1c.js" crossorigin="anonymous"></script>
+{% endblock %}
+{% block content %}
+    <form action="/login" method="POST">
+        <div class="form-group">
+            <label for="exampleInputPassword1">Raum-Code</label>
+            <input type="text" class="form-control" name="user" placeholder="username">
+            <input type="password" class="form-control" name="password" placeholder="password">
+            <button type="submit" class="btn btn-primary">Submit</button>
+        </div>
+
+    </form>
+{% endblock %}

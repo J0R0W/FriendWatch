@@ -5,7 +5,9 @@ A Simple Flask Website to Watch Videos with your Friends synchronous
 1. Install Python3
 2. Open Command prompt
     * Execute ```pip install -r requirements.txt```
-3. Run server by executing ```python app.py``` or depending on the system ```python app.py```
+3. Run server by executing ```python app.py``` or depending on the system ```python3 app.py```
+4. Now you can reach the local web server via port 1337. 
+For the server to be reachable from the Internet, the port forwarding in the router must be configured accordingly.
 
 ## Start a Stream
 Copy some Videos in the /static/video folder. 

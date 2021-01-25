@@ -8,11 +8,8 @@
 {% endblock %}
 {% block content %}
     {% for item in videos %}
-
         <ul>
-
-            <form method="post" action="/create" class="inline"  >
-
+            <form method="post" action="/create" class="inline" >
                 <button type="submit" name="video" value="{{ item }}" class="btn btn-link">{{ item }}</button>
             </form>
         </ul>

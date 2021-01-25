@@ -123,11 +123,10 @@ def updatetime():
         return "Bad Room-Code"
 
     # if abs(r.lastPlay + float(videotime) - time.time()) > 1:
-    time_pos_of_video = abs(calc_where_the_video_should_be(videoid))
-    print("Video should be at:" + str(time_pos_of_video))
+    time_pos_of_video = abs(calc_the_time_where_the_video_should_be(videoid))
+    #print("Video should be at:" + str(time_pos_of_video))
     if abs(time_pos_of_video - float(videotime)) > maxDelaySeconds and r.status == "play":
         print("Video Delayed:" + str(abs(time_pos_of_video - float(videotime))))
-        # returnTime = (float(r.time) + time_pos_of_video)
         return json.dumps({'time': time_pos_of_video, "updated": True, 'status': r.status})
     return json.dumps({"updated": False, 'status': r.status})
 
@@ -149,15 +148,7 @@ def startwatch():
         abort(403)
 
 
-# This Method is called every 0.25 Seconds to Update the Time for each active Room.
-# The server calculates the current time depending on client events.
-def calculateTime():
-    for key, value in Rooms.items():
-        if value.status == "play":
-            value.time += 0.25
-
-
-def calc_where_the_video_should_be(raumID):
+def calc_the_time_where_the_video_should_be(raumID):
     currentTime = time.time()
     r = Rooms[raumID]
     timepos = float(r.lastPlay) - float(r.time)

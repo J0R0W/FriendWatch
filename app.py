@@ -8,10 +8,13 @@ from flask import Flask, render_template, request, json, session, abort, redirec
 from utility import RepeatedTimer
 
 app = Flask(__name__)
+#Secret Key for Sessions !!!Important: Please Change!!!
 app.secret_key = "iguzuzcsd89sd80f9z08whwucf03q2cd08hcwkjkjsdqq"
+#how many seconds the video rewinds to the correct position
 maxDelaySeconds = 1
-
-adminTime = 4
+#Admin Login
+adminUsername = "admin"
+adminPassword = "hugo"
 # Dictonary of All Avaible Rooms
 Rooms = {}
 
@@ -160,9 +163,9 @@ def calc_the_time_where_the_video_should_be(raumID):
 @app.route("/login", methods=["POST", "GET"])
 def login():
     if request.method == "POST":
-        user = request.form.get("user")
+        user = request.form.get("user").lower()
         passw = request.form.get("password")
-        if user == "admin" and passw == "hugo":
+        if user == adminUsername and passw == adminPassword:
             session["user"] = "admin"
         return redirect("/startwatch")
     else:

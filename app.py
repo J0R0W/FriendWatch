@@ -3,9 +3,9 @@ import random
 import string
 import time
 
-from werkzeug.utils import secure_filename
+from werkzeug.utils import secure_filename, escape
 from flask import Flask, render_template, request, json, session, abort, redirect, url_for
-from utility import RepeatedTimer
+from utility import RepeatedTimer, getVideoFolderPath, get_next_possible_filename
 
 app = Flask(__name__)
 #Secret Key for Sessions !!!Important: Please Change!!!
@@ -65,10 +65,7 @@ def createwatch():
         # Store a link to a Video in a Txt File
         if vid.endswith('txt'):
             # get Path to Video Folder
-            path = os.getcwd()
-            path = os.path.join(path, "static")
-            path = os.path.join(path, "video")
-            path = os.path.join(path, vid)
+            path = getVideoFolderPath(filename=vid)
             f = open(path, "r")
             # Read the Link to a video
             videolocation = f.read()
@@ -150,6 +147,24 @@ def startwatch():
     else:
         abort(403)
 
+@app.route("/add", methods=["POST"])
+def addFile():
+    fileEnding = ".txt"
+    if (request.method == "POST" and session.get("user") == "admin"):
+        content = request.form.get("txt")
+        name = request.form.get("txtTitle")
+        content = escape(content) #Secure User Inpt
+        name = secure_filename(escape(name))
+
+        path = getVideoFolderPath() #In this Folder we want to create the new TXT File
+        path = os.path.join(path, name)
+        path = get_next_possible_filename(path, file_ending=fileEnding)
+        try:
+            f = open(path, "x")
+            f.write(content)
+        except:
+            abort(406)
+        return redirect("/startwatch", 302)
 
 def calc_the_time_where_the_video_should_be(raumID):
     currentTime = time.time()

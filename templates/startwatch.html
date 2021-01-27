@@ -6,10 +6,54 @@
     <link rel="stylesheet" href="/static/video.css"/>
     <script src="https://kit.fontawesome.com/20713e1f1c.js" crossorigin="anonymous"></script>
 {% endblock %}
+{% block heading %}Start new Stream{% endblock %}
 {% block content %}
+    <div class="row">
+        <div class="col-sm-6">
+            <button type="button" class="btn btn-primary btn-block"><span class="glyphicon glyphicon-upload"
+                                                                          aria-hidden="true"></span> Upload Video
+            </button>
+        </div>
+        <div class="col-sm-6">
+            <button type="button" class="btn btn-primary btn-block" data-toggle="modal" data-target="#txtModal">
+                <span class="glyphicon glyphicon-plus" aria-hidden="true"></span> Add Direct Video Link
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal -->
+    <div class="modal fade" id="txtModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle">Add Video by Link</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form action="/add" method="POST">
+                        <div class="form-group">
+                            <label for="txtName" >VideoTitle:</label>
+                            <input class="form-control" name="txtTitle" id="txtName" rows="3"/>
+                            <label for="addTxtFormControl" >Paste The Direct Video Link:</label>
+                            <input  class="form-control" name="txt" id="addTxtFormControl" rows="3">
+                        </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-success">Save</button>
+                </div>
+                </form>
+                    </div>
+            </div>
+        </div>
+    </div>
+
     {% for item in videos %}
         <ul>
-            <form method="post" action="/create" class="inline" >
+            <form method="post" action="/create" class="inline">
                 <button type="submit" name="video" value="{{ item }}" class="btn btn-link">{{ item }}</button>
             </form>
         </ul>

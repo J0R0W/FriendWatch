@@ -219,5 +219,14 @@ def upload():
     return redirect("/startwatch", 302)
 
 
+@app.route("/delete", methods=["POST"])
+def delete():
+    if request.method == "POST" and session["user"] == "admin":
+        delFile = secure_filename(request.form.get("delBtn"))
+        os.remove(getVideoFolderPath(filename=delFile))
+        return redirect("/startwatch", 302)
+    return ""
+
+
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0', port=1337)

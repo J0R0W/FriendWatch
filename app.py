@@ -4,19 +4,21 @@ import string
 import time
 
 from werkzeug.utils import secure_filename, escape
-from flask import Flask, render_template, request, json, session, abort, redirect, url_for
-from utility import RepeatedTimer, getVideoFolderPath, get_next_possible_filename
+from flask import Flask, render_template, request, json, session, abort, redirect, url_for, flash
+from utility import RepeatedTimer, getVideoFolderPath, get_next_possible_filename, allowed_file
 
 app = Flask(__name__)
-#Secret Key for Sessions !!!Important: Please Change!!!
+# Secret Key for Sessions !!!Important: Please Change!!!
 app.secret_key = "iguzuzcsd89sd80f9z08whwucf03q2cd08hcwkjkjsdqq"
-#how many seconds the video rewinds to the correct position
+# how many seconds the video rewinds to the correct position
 maxDelaySeconds = 1
-#Admin Login
+# Admin Login
 adminUsername = "admin"
 adminPassword = "hugo"
 # Dictonary of All Avaible Rooms
 Rooms = {}
+
+app.config['ALLOWED_EXTENSIONS'] = {'mp4', 'avi', 'webm'}
 
 
 # Class to manage Rooms
@@ -124,7 +126,7 @@ def updatetime():
 
     # if abs(r.lastPlay + float(videotime) - time.time()) > 1:
     time_pos_of_video = abs(calc_the_time_where_the_video_should_be(videoid))
-    #print("Video should be at:" + str(time_pos_of_video))
+    # print("Video should be at:" + str(time_pos_of_video))
     if abs(time_pos_of_video - float(videotime)) > maxDelaySeconds and r.status == "play":
         print("Video Delayed:" + str(abs(time_pos_of_video - float(videotime))))
         return json.dumps({'time': time_pos_of_video, "updated": True, 'status': r.status})
@@ -147,16 +149,23 @@ def startwatch():
     else:
         abort(403)
 
+
+@app.route("/logout")
+def logout():
+    session['user'] = None
+    return redirect("/")
+
+
 @app.route("/add", methods=["POST"])
 def addFile():
     fileEnding = ".txt"
     if (request.method == "POST" and session.get("user") == "admin"):
         content = request.form.get("txt")
         name = request.form.get("txtTitle")
-        content = escape(content) #Secure User Inpt
+        content = escape(content)  # Secure User Inpt
         name = secure_filename(escape(name))
 
-        path = getVideoFolderPath() #In this Folder we want to create the new TXT File
+        path = getVideoFolderPath()  # In this Folder we want to create the new TXT File
         path = os.path.join(path, name)
         path = get_next_possible_filename(path, file_ending=fileEnding)
         try:
@@ -165,6 +174,7 @@ def addFile():
         except:
             abort(406)
         return redirect("/startwatch", 302)
+
 
 def calc_the_time_where_the_video_should_be(raumID):
     currentTime = time.time()
@@ -185,6 +195,28 @@ def login():
         return redirect("/startwatch")
     else:
         return render_template("login.html")
+
+
+@app.route("/upload", methods=['POST'])
+def upload():
+    if request.method == 'POST':
+        # check if the post request has the file part
+        if 'file' not in request.files:
+            flash('No file part')
+            return redirect(request.url)
+        file = request.files['file']
+        # if user does not select file, browser also
+        # submit an empty part without filename
+        if file.filename == '':
+            flash('No selected file')
+            return redirect(request.url)
+        if file and allowed_file(file.filename, app.config['ALLOWED_EXTENSIONS']):
+            filename = secure_filename(file.filename)
+            save_location = os.path.join(getVideoFolderPath(), filename)
+            save_location = get_next_possible_filename(save_location)
+            file.save(save_location)
+            return redirect("/startwatch", 302)
+    return redirect("/startwatch", 302)
 
 
 if __name__ == '__main__':

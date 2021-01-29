@@ -50,3 +50,8 @@ def get_next_possible_filename(path, file_ending=""):
         sequence = int(sequence or 0) + 1
     path = path + str(sequence)
     return path + file_ending
+
+
+def allowed_file(filename, allowed_extensions):
+    return '.' in filename and \
+           filename.rsplit('.', 1)[1].lower() in allowed_extensions

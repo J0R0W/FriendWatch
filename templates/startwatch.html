@@ -5,12 +5,20 @@
     <!--<link rel="stylesheet" href="https://cdn.plyr.io/3.6.3/plyr.css"/-->
     <link rel="stylesheet" href="/static/video.css"/>
     <script src="https://kit.fontawesome.com/20713e1f1c.js" crossorigin="anonymous"></script>
+    <style type="text/css">
+        .push-left {
+            float: left;
+        }
+        .push-mid {
+            margin: 1px;
+        }
+    </style>
 {% endblock %}
 {% block heading %}Start new Stream{% endblock %}
 {% block content %}
     <div class="row">
         <div class="col-sm-6">
-            <button type="button" class="btn btn-primary btn-block"><span class="glyphicon glyphicon-upload"
+            <button type="button" class="btn btn-primary btn-block" data-toggle="modal" data-target="#uploadModal"><span class="glyphicon glyphicon-upload"
                                                                           aria-hidden="true"></span> Upload Video
             </button>
         </div>
@@ -35,27 +43,67 @@
                 <div class="modal-body">
                     <form action="/add" method="POST">
                         <div class="form-group">
-                            <label for="txtName" >VideoTitle:</label>
+                            <label for="txtName">VideoTitle:</label>
                             <input class="form-control" name="txtTitle" id="txtName" rows="3"/>
-                            <label for="addTxtFormControl" >Paste The Direct Video Link:</label>
-                            <input  class="form-control" name="txt" id="addTxtFormControl" rows="3">
+                            <label for="addTxtFormControl">Paste The Direct Video Link:</label>
+                            <input class="form-control" name="txt" id="addTxtFormControl" rows="3">
                         </div>
 
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="submit" class="btn btn-success">Save</button>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-success">Save</button>
+                        </div>
+                    </form>
                 </div>
-                </form>
-                    </div>
             </div>
         </div>
     </div>
+    <!-- Modal -->
+    <div class="modal fade" id="uploadModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle"
+         aria-hidden="true">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exampleModalLongTitle">Upload Video File</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form action="/upload" method="post" enctype="multipart/form-data">
+                        <div class="form-group">
 
-    {% for item in videos %}
-        <ul>
-            <form method="post" action="/create" class="inline">
-                <button type="submit" name="video" value="{{ item }}" class="btn btn-link">{{ item }}</button>
-            </form>
-        </ul>
-    {% endfor %}
+                            <label for="addTxtFormControl">Upload File</label>
+                            <input type=file name=file accept="video/*" class="btn btn-primary">
+                        </div>
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button type="submit" class="btn btn-success">Upload</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="container">
+
+            {% for item in videos %}
+                <div class="row">
+                <div class="col">
+                    <form id="formTrash" class="push-left" method="post" action="/delete">
+                        <button name="delBtn" value="{{ item }}"type="submit" class="btn btn-link"><span
+                                class="btn btn-danger glyphicon glyphicon-trash"></span></button>
+                    </form>
+                </div>
+                <div class="col">
+                    <form id="formmovie" method="post" action="/create" class="push-left">
+                        <button type="submit" name="video" value="{{ item }}" class="btn btn-link"><span
+                                class="btn btn-info glyphicon glyphicon-film"></span> {{ item }}</button>
+                    </form>
+                </div>
+</div>
+            {% endfor %}
+
+                </div>
 {% endblock %}
